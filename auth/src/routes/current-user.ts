@@ -1,5 +1,6 @@
 import express from "express";
-import { currentUser } from "../middleware/current-user";
+import { currentUser } from "@yootick/common";
+
 
 const router = express.Router();
 
