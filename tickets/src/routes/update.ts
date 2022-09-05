@@ -27,10 +27,11 @@ router.put(
   }
 
   try {
-    ticket.title = req.body.title;
-    ticket.price = req.body.price;
-
-    await ticket.updateOne()
+    ticket.set({
+      title: req.body.title,
+      price: req.body.price
+    });
+    await ticket.save();
   } catch (error) {
     throw new BadRequestError('Error Update');
   }
