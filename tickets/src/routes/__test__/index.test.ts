@@ -2,6 +2,8 @@ import request from 'supertest';
 import { app } from '../../app';
 import { Tickets } from '../../models/ticket';
 
+jest.mock('../../nats-wrapper');
+
 describe('Test Fetch List All Ticket route', () => {
 
   const path = '/api/tickets';

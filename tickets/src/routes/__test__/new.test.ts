@@ -1,6 +1,9 @@
 import request from 'supertest';
 import { app } from '../../app';
 import { Tickets } from '../../models/ticket';
+import { natsWrapper } from '../../nats-wrapper';
+
+jest.mock('../../nats-wrapper');
 
 describe('Test Create Ticket route', () => { 
 
@@ -82,5 +85,25 @@ describe('Test Create Ticket route', () => {
     expect(tickets[0].price).toEqual(20);
     expect(tickets[0].title).toEqual(title);
   });
+
+  it('publishes an event', async() => {
+    // add in a check to make sure a ticket was saved
+    let tickets = await Tickets.find({});
+    expect(tickets.length).toEqual(0);
+    
+    let title = 'Valid Ticket'
+
+    await request(app)
+      .post(path)
+      .set('Cookie', global.signin())
+      .send({
+        title: title,
+        price: 20
+      })
+      .expect(201);
+    
+    expect(natsWrapper.client.publish).toHaveBeenCalled();
+      
+  })
 
 });

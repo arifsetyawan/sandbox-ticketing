@@ -2,6 +2,8 @@ import express, {Request, Response} from "express";
 import { BadRequestError, NotAuthorizedError, NotFoundError, requireAuth, validateRequest } from "@yootick/common";
 import { body } from "express-validator";
 import { Tickets } from "../models/ticket";
+import { TicketUpdatedPublisher } from "../events/publisher/ticket-updated.publisher";
+import { natsWrapper } from "../nats-wrapper";
 
 const router = express.Router()
 
@@ -32,6 +34,14 @@ router.put(
       price: req.body.price
     });
     await ticket.save();
+
+    await new TicketUpdatedPublisher(natsWrapper.client).publish({
+      id: ticket.id,
+      title: ticket.title,
+      price: ticket.price,
+      userId: ticket.userId
+    })
+
   } catch (error) {
     throw new BadRequestError('Error Update');
   }

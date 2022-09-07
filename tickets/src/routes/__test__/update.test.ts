@@ -1,6 +1,9 @@
 import mongoose from 'mongoose';
 import request from 'supertest';
 import { app } from '../../app';
+import {natsWrapper} from '../../nats-wrapper';
+
+jest.mock('../../nats-wrapper');
 
 describe('Updating Ticket', () => {
   const path = '/api/tickets';
@@ -89,5 +92,20 @@ describe('Updating Ticket', () => {
     expect(updateResponse.body.price).toEqual(129);
     
   });
+
+  it('publishes an event', async () => {
+    const cookie = global.signin();
+    const newTicket = await createTicket(cookie);
+
+    const updateResponse = await request(app)
+        .put(path+`/${newTicket.body.id}`)
+        .set('Cookie', cookie)
+        .send({
+          title: 'Something New',
+          price: 129
+        }).expect(200);
+    
+    expect(natsWrapper.client.publish).toHaveBeenCalled();
+  })
 
 })
