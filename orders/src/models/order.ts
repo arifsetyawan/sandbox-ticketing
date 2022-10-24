@@ -1,29 +1,35 @@
 import mongoose from "mongoose";
+import { OrderStatus } from "@yootick/common";
+import { TicketDoc } from "./ticket";
+
+export { OrderStatus };
 
 // An interface that are required to create a new Orders
-interface OrdersAttrs {
-  title: string;
-  price: number;
+interface OrderAttrs {
   userId: string;
+  status: OrderStatus;
+  expiresAt: Date;
+  ticket: TicketDoc;
 }
 
 // An interface that describe the properties that a Orders Document has
-interface OrdersDoc extends mongoose.Document {
-  title: string;
-  price: number;
+interface OrderDoc extends mongoose.Document {
   userId: string;
+  status: OrderStatus;
+  expiresAt: Date;
+  ticket: TicketDoc;
 }
 
 // An interface that describe the properties that a Orders Model has
-interface OrdersModel extends mongoose.Model<OrdersDoc> {
-  build(attrs: OrdersAttrs): OrdersDoc;
+interface OrderModel extends mongoose.Model<OrderDoc> {
+  build(attrs: OrderAttrs): OrderDoc;
 }
 
-const OrdersSchema = new mongoose.Schema({
-  status: { type: String, required: true },
-  expiresAt: { type: String, required: true },
+const OrderSchema = new mongoose.Schema({
   userId: { type: String, required: true },
-  ticketId: { type: String, required: true },
+  status: { type: String, required: true, enum: Object.values(OrderStatus), default: OrderStatus.Created },
+  expiresAt: { type: mongoose.Schema.Types.Date },
+  ticket: { type: mongoose.Schema.Types.ObjectId, ref: 'Ticket' }
 },{
   toJSON: {
     transform(doc, ret) {
@@ -34,14 +40,14 @@ const OrdersSchema = new mongoose.Schema({
   }
 })
 
-OrdersSchema.pre('save', async function (done) {
+OrderSchema.pre('save', async function (done) {
   done();
 })
 
-OrdersSchema.statics.build = (attrs: OrdersAttrs) => {
-  return new Orders(attrs);
+OrderSchema.statics.build = (attrs: OrderAttrs) => {
+  return new Order(attrs);
 }
 
-const Orders = mongoose.model<OrdersDoc, OrdersModel>('Orders', OrdersSchema);
+const Order = mongoose.model<OrderDoc, OrderModel>('Order', OrderSchema);
 
-export { Orders };
+export { Order };
