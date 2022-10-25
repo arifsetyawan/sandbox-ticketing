@@ -1,20 +1,23 @@
 import { Message } from "node-nats-streaming";
-import { Subjects, Listener, TicketCreatedEvent } from "@yootick/common";
+import { Subjects, Listener, TicketUpdatedEvent } from "@yootick/common";
 import { Ticket } from "../../models/ticket";
 import { queueGroupName } from "./queue-group-name";
 
-export class TicketCreatedListener extends Listener<TicketCreatedEvent> {
-  subjects: Subjects.TicketCreated = Subjects.TicketCreated;
+export class TicketUpdatedListener extends Listener<TicketUpdatedEvent> {
+  subjects: Subjects.TicketUpdated = Subjects.TicketUpdated;
   queueGroupName: string = queueGroupName;
   
-  async onMessage(data: TicketCreatedEvent['data'], msg: Message) {
+  async onMessage(data: TicketUpdatedEvent['data'], msg: Message) {
 
     const { id, title, price } = data;
-    const ticket = Ticket.build({
-      id,
-      title,
-      price
-    });
+    
+    const ticket = await Ticket.findById(id);
+    if (!ticket) {
+      throw new Error('Ticket not found');
+    }
+
+    ticket.set({ title, price });
+
     await ticket.save();
 
     msg.ack();
