@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { OrderStatus } from "@yootick/common";
+import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 import { TicketDoc } from "./ticket";
 
 export { OrderStatus };
@@ -18,6 +19,7 @@ interface OrderDoc extends mongoose.Document {
   status: OrderStatus;
   expiresAt: Date;
   ticket: TicketDoc;
+  version: number;
 }
 
 // An interface that describe the properties that a Orders Model has
@@ -43,6 +45,9 @@ const OrderSchema = new mongoose.Schema({
 OrderSchema.pre('save', async function (done) {
   done();
 })
+
+OrderSchema.set('versionKey', 'version');
+OrderSchema.plugin(updateIfCurrentPlugin);
 
 OrderSchema.statics.build = (attrs: OrderAttrs) => {
   return new Order(attrs);

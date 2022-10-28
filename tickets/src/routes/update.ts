@@ -24,11 +24,16 @@ router.put(
     throw new NotFoundError()
   }
 
+  if (ticket.orderId) {
+    throw new BadRequestError('Cannot edit a reserved ticket');
+  }
+
   if(ticket.userId !== req.currentUser!.id) {
     throw new NotAuthorizedError()
   }
 
   try {
+
     ticket.set({
       title: req.body.title,
       price: req.body.price
@@ -39,7 +44,8 @@ router.put(
       id: ticket.id,
       title: ticket.title,
       price: ticket.price,
-      userId: ticket.userId
+      userId: ticket.userId,
+      version: ticket.version
     })
 
   } catch (error) {

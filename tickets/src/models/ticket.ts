@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
 
 // An interface that are required to create a new Tickets
 interface TicketsAttrs {
@@ -12,6 +13,8 @@ interface TicketsDoc extends mongoose.Document {
   title: string;
   price: number;
   userId: string;
+  version: number;
+  orderId?: string;
 }
 
 // An interface that describe the properties that a Tickets Model has
@@ -23,12 +26,12 @@ const TicketsSchema = new mongoose.Schema({
   title: { type: String, required: true },
   price: { type: Number, required: true },
   userId: { type: String, required: true },
+  orderId: { type: String },
 },{
   toJSON: {
     transform(doc, ret) {
       ret.id = ret._id;
       delete ret._id;
-      delete ret.__v;
     }
   }
 })
@@ -36,6 +39,9 @@ const TicketsSchema = new mongoose.Schema({
 TicketsSchema.pre('save', async function (done) {
   done();
 })
+
+TicketsSchema.set('versionKey', 'version');
+TicketsSchema.plugin(updateIfCurrentPlugin);
 
 TicketsSchema.statics.build = (attrs: TicketsAttrs) => {
   return new Tickets(attrs);
