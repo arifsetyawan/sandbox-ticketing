@@ -2,12 +2,12 @@ import { Stan } from 'node-nats-streaming';
 import { Subjects } from './subjects';
 
 interface Event {
-  subjects: Subjects;
+  subject: Subjects;
   data: any;
 }
 
 export abstract class Publisher<T extends Event> {
-  abstract subjects: T['subjects'];
+  abstract subject: T['subject'];
   private client: Stan;
 
   constructor(client: Stan) {
@@ -16,11 +16,11 @@ export abstract class Publisher<T extends Event> {
 
   publish(data: T['data']): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.client.publish(this.subjects, JSON.stringify(data), (err) => {
+      this.client.publish(this.subject, JSON.stringify(data), (err) => {
         if (err) {
           return reject(err);
         }
-        console.log('Event published to subjects:', this.subjects);
+        console.log('Event published to subjects:', this.subject);
         resolve();
       });
     });
