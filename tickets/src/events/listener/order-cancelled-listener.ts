@@ -5,7 +5,7 @@ import { Tickets } from "../../models/ticket";
 import { TicketUpdatedPublisher } from "../publisher/ticket-updated.publisher";
 
 export class OrderCancelledListener extends Listener<OrderCancelledEvent> {
-  subjects: Subjects.OrderCancelled = Subjects.OrderCancelled;
+  subject: Subjects.OrderCancelled = Subjects.OrderCancelled;
   queueGroupName = queueGroupName;
 
   async onMessage(data: OrderCancelledEvent["data"], msg: Message) {
